@@ -1,0 +1,106 @@
+--------create a Dckerfile outside src
+
+# Stage 1: Build the application
+FROM node:latest as node
+WORKDIR /app
+COPY . .
+RUN npm install
+RUN npm run build --prod
+# Stage 2: Serve the built application using Nginx
+FROM nginx:alpine
+COPY --from=node /app/dist/todo-app /usr/share/nginx/html
+
+
+
+In terminal
+
+docker login
+
+docker build -t ameena245255/angular-app .      (docker username)
+
+
+docker images
+
+docker run -d -it -p 80:80/tcp --name angular-app ameena245255/angular-app:latest
+
+In docker   --- in use-----click 80:80
+
+
+In terminal  
+docker push ameena245255/angular-app:latest
+
+
+
+---------------------------------------------
+
+
+
+add a file deployment.yml outside src
+
+
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: angular-deployment
+spec:
+  selector:
+    matchLabels:
+      app: angular
+  replicas: 5 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: angular
+    spec:
+      containers:
+      - name: angular
+        image: ameena245255/angular-app:latest
+        ports:
+        - containerPort: 80
+---
+# https://kubernetes.io/docs/concepts/services-networking/service/#defining-a-service
+kind: Service
+apiVersion: v1
+metadata:
+  name: angular-service
+spec:
+  selector:
+    app: angular
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 31000
+  type: NodePort
+
+
+
+----------------In cmd
+
+
+minikube start
+
+minikube status
+
+minikube docker-env
+
+REM @FOR /f "tokens=*" %i IN ('minikube -p minikube docker-env --shell cmd') DO @%i
+
+docker images
+
+kubectl apply -f deployment.yml
+
+kubectl get deployment
+
+kubectl get pods
+
+kubectl get service
+
+minikube dashboard
+
+minikube service angular-service --url
+
+
+
+
+
